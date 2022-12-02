@@ -63,7 +63,7 @@ fn choice_score(choice: &str) -> i32 {
     };
 }
 
-/// The score due to the RPS match where if you lost, 3 if the round was a draw, and 6 if you won
+/// The score due to the RPS match where 0 if you lost, 3 if the round was a draw, and 6 if you won
 fn match_score(opponent_choice: &str, ego_choice: &str) -> i32 {
     // Draw
     if opponent_choice == ego_choice {
