@@ -6,16 +6,17 @@ fn main() {
     let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
     let games: Vec<&str> = contents.split("\n").collect();
 
-    let mut total_score_first_guess= 0;
-    let mut total_score_second_guess= 0;
+    let mut total_score_first_guess = 0;
+    let mut total_score_second_guess = 0;
     for cur_game in games {
         let moves: Vec<&str> = cur_game.split(" ").collect();
 
         // If we have an empty line just keep going
         if moves == [""] {
             continue;
-        }
+        }   
 
+        // Map moves to rock, paper and scissors
         let opponent_move = match moves.get(0).unwrap() {
             &"A" => "R",
             &"B" => "P",
@@ -24,21 +25,32 @@ fn main() {
         };
 
         // Calculate the score when using the first guess of what the code is
-        let ego_move_first_guess= match moves.get(1).unwrap() {
+        let ego_move_first_guess = match moves.get(1).unwrap() {
             &"X" => "R",
             &"Y" => "P",
             &"Z" => "S",
             &&_ => todo!(),
         };
-        total_score_first_guess += choice_score(ego_move_first_guess) + match_score(opponent_move, ego_move_first_guess);
+        total_score_first_guess +=
+            choice_score(ego_move_first_guess) + match_score(opponent_move, ego_move_first_guess);
 
+        // Get the move we need to make for the second guess of the code
         let ego_move_instruction = moves.get(1).unwrap();
         let ego_move_second_guess = match_move_for_outcome(opponent_move, ego_move_instruction);
-        total_score_second_guess += choice_score(&ego_move_second_guess) + match_score(opponent_move, &ego_move_second_guess);
+        // Calculate the score for the second guess
+        total_score_second_guess += choice_score(&ego_move_second_guess)
+            + match_score(opponent_move, &ego_move_second_guess);
     }
 
-    println!("Total for the first code guess: {}", total_score_first_guess);
-    println!("Total for the second code guess: {}", total_score_second_guess);
+    // Print results
+    println!(
+        "Total for the first code guess: {}",
+        total_score_first_guess
+    );
+    println!(
+        "Total for the second code guess: {}",
+        total_score_second_guess
+    );
 }
 
 /// The score due to the choice of move with 1 for Rock, 2 for Paper, and 3 for Scissors where
@@ -74,24 +86,26 @@ fn match_score(opponent_choice: &str, ego_choice: &str) -> i32 {
 /// lose, Y means you need to end the round in a draw, and Z means you need to win
 fn match_move_for_outcome(opponent_choice: &str, ego_instruction: &str) -> String {
     // Draw
-    if ego_instruction == "Y"{ return opponent_choice.to_string();}
+    if ego_instruction == "Y" {
+        return opponent_choice.to_string();
+    }
 
-    // Lose
+    // We lose
     if ego_instruction == "X" {
         return match opponent_choice {
-            "R" => "S".to_string(), 
-            "P" => "R".to_string(), 
-            "S" => "P".to_string(), 
+            "R" => "S".to_string(),
+            "P" => "R".to_string(),
+            "S" => "P".to_string(),
             &_ => todo!(),
         };
     }
 
-    // Win
+    // We win
     if ego_instruction == "Z" {
         return match opponent_choice {
-            "R" => "P".to_string(), 
-            "P" => "S".to_string(), 
-            "S" => "R".to_string(), 
+            "R" => "P".to_string(),
+            "P" => "S".to_string(),
+            "S" => "R".to_string(),
             &_ => todo!(),
         };
     }
