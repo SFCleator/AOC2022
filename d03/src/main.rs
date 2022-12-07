@@ -16,27 +16,28 @@ fn main() {
             continue;
         }
 
-        let mut in_backpack_common_items =
+        let in_backpack_common_items =
             dual_common(backpack, 0, length_half, length_half, length_half * 2);
 
         value += score_items(&in_backpack_common_items);
-
-        //println!("{} {:?} {}",  backpack, in_backpack_common_items, value);
     }
-    //println!("Result: {}", value);
-    //
-    let mut team_score = 0;
+    println!("Wrong backpack result: {value}");
 
+    let mut team_score = 0;
     for idx in 0..backpacks.len() {
         let start_idx = idx * 3;
 
-        let length_half: usize = (backpacks.get(start_idx).unwrap().chars().count())
-            .try_into()
-            .unwrap();
-        if length_half == 0 {
-            continue;
+        // Ignore if we're starting with an empty string
+        match backpacks.get(start_idx) {
+            Some(x) => {
+                if *x == "" {
+                    continue;
+                }
+            }
+            None => continue,
         }
 
+        // Get all the sets of interest
         let first_set: HashSet<char> = backpacks
             .get(start_idx)
             .unwrap()
@@ -55,15 +56,14 @@ fn main() {
             .to_string()
             .chars()
             .collect();
-        let mut first_intersection: HashSet<char> =
+
+        // Find their intersection
+        let first_intersection: HashSet<char> =
             first_set.intersection(&second_set).cloned().collect();
-        let mut second_intersection: HashSet<char> = first_intersection
+        let second_intersection: HashSet<char> = first_intersection
             .intersection(&third_set)
             .cloned()
             .collect();
-
-        //let sets = [&second_set, &third_set, ...];
-        //first_set.iter().filter(|k| sets.all(|s| s.contains(k)))
 
         let alphabet: Vec<char> = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             .chars()
@@ -74,21 +74,9 @@ fn main() {
                 break;
             }
         }
-
-        println!("{team_score}");
-
-        //let  mut dual_backpack: Vec<String>= Vec::new();
-        //dual_backpack.push_str(&backpacks.get(start_idx).unwrap().to_string());
-        //dual_backpack.push_str(&backpacks.get(start_idx+1).unwrap().to_string());
-
-        //let first_string_size: usize = backpacks.get(start_idx).unwrap().len();
-
-        //let first_two_compare = dual_common(dual_backpack, 0, first_string_size,first_string_size, dual_backpack.len());
-
-        //println!("{} {:?}", dual_backpack, first_two_compare);
     }
 
-    println!("{team_score}");
+    println!("Team score: {team_score}");
 }
 
 fn dual_common(
