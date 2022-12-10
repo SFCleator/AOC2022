@@ -195,14 +195,32 @@ fn main() {
 
         terminal.parse(command);
     }
-    terminal.filesystem.print();
 
     let mut small_sizes = 0;
     const CUTOFF_SIZE:i32 = 100000;
-    for size in terminal.filesystem.get_directory_sizes() {
-        if size <= CUTOFF_SIZE{
-            small_sizes += size;
+    let dir_sizes = terminal.filesystem.get_directory_sizes();
+    for size in &dir_sizes {
+        if *size <= CUTOFF_SIZE{
+            small_sizes += *size;
         }
     }
     println!("Cutoff Sizes: {small_sizes}");
+
+    const TOTAL_DISK_SPACE:i32 = 70000000;
+    const DISK_SPACE_NEEDED:i32 = 30000000;
+    let mut max_size = 0;
+    for size in &dir_sizes {
+        if *size > max_size {
+            max_size = *size;
+        }
+    }
+    let free_up_required = DISK_SPACE_NEEDED - TOTAL_DISK_SPACE + max_size;
+    
+    let mut smallest_free_up = max_size;
+    for size in &dir_sizes {
+        if *size > free_up_required && *size < smallest_free_up {
+            smallest_free_up = *size;
+        }
+    }
+    println!("Smallest free up needed: {smallest_free_up}");
 }
