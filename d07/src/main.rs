@@ -2,26 +2,26 @@ use std::fs;
 
 struct File {
     size: i32,
-    name: String
+    name: String,
 }
 
 struct Directory {
     id: i32,
     children: Vec<i32>,
     files: Vec<File>,
-    name: String
+    name: String,
 }
 
 impl Directory {
     pub fn get_size(&self, listing: &Vec<Directory>) -> i32 {
-        let mut size= 0;
+        let mut size = 0;
 
         for file in &self.files {
             size += file.size;
         }
 
         for other_dir in listing {
-            if self.children.contains(&other_dir.id ) {
+            if self.children.contains(&other_dir.id) {
                 size += other_dir.get_size(listing);
             }
         }
@@ -31,26 +31,25 @@ impl Directory {
 }
 
 struct FileSystem {
-    root_id :i32 ,
-    dirs : Vec<Directory>,
-    max_id: i32
+    root_id: i32,
+    dirs: Vec<Directory>,
+    max_id: i32,
 }
 
 impl FileSystem {
-    pub fn new()->Self {
+    pub fn new() -> Self {
         let mut fs = FileSystem {
-            root_id:0,
-            dirs :Vec::new(),
-            max_id:0
+            root_id: 0,
+            dirs: Vec::new(),
+            max_id: 0,
         };
         fs.dirs.push(Directory {
-                id:0,
-                children : Vec::new(),
-                files: Vec::new(),
-                name : "/".to_string()
-            }
-        );
-    
+            id: 0,
+            children: Vec::new(),
+            files: Vec::new(),
+            name: "/".to_string(),
+        });
+
         return fs;
     }
     pub fn find_dir_id(&self, dir_name: &str, parent_id: i32) -> i32 {
@@ -58,7 +57,7 @@ impl FileSystem {
             if dir.id == parent_id {
                 for child_id in &dir.children {
                     for child_dir in &self.dirs {
-                        if child_dir.id == *child_id{
+                        if child_dir.id == *child_id {
                             if child_dir.name == dir_name.to_string() {
                                 return *child_id;
                             }
@@ -83,10 +82,10 @@ impl FileSystem {
     pub fn add_directory(&mut self, parent_id: i32, name: &str) {
         self.max_id += 1;
         let new_dir = Directory {
-            id : self.max_id,
+            id: self.max_id,
             children: Vec::new(),
             files: Vec::new(),
-            name : name.to_string()
+            name: name.to_string(),
         };
         self.dirs.push(new_dir);
 
@@ -100,12 +99,10 @@ impl FileSystem {
     pub fn add_file(&mut self, directory_id: i32, name: &str, size: i32) {
         for dir in &mut self.dirs {
             if dir.id == directory_id {
-                dir.files.push(
-                    File {
-                        size: size,
-                        name: name.to_string()
-                    }
-                );
+                dir.files.push(File {
+                    size: size,
+                    name: name.to_string(),
+                });
             }
         }
     }
@@ -118,7 +115,7 @@ impl FileSystem {
             }
         }
     }
-    
+
     pub fn get_directory_sizes(&self) -> Vec<i32> {
         let mut sizes: Vec<i32> = Vec::new();
 
@@ -130,19 +127,18 @@ impl FileSystem {
     }
 }
 
-
 struct Terminal {
-    pwd : i32,
-    filesystem : FileSystem
+    pwd: i32,
+    filesystem: FileSystem,
 }
 
 impl Terminal {
     pub fn new() -> Self {
-        let fs = FileSystem::new(); 
+        let fs = FileSystem::new();
 
         Terminal {
-            pwd : fs.root_id,
-            filesystem : fs
+            pwd: fs.root_id,
+            filesystem: fs,
         }
     }
 
@@ -154,19 +150,25 @@ impl Terminal {
         match command_name {
             "ls" => self.ls(output),
             "cd" => self.cd(args),
-            &_ => println!("Command \"{}\" not recognised", command_name)
+            &_ => println!("Command \"{}\" not recognised", command_name),
         }
     }
 
     pub fn ls(&mut self, output: Vec<&str>) {
         for line in output {
-            if line == ""{
-                continue
+            if line == "" {
+                continue;
             }
             let elements: Vec<&str> = line.split(" ").collect();
-            match *elements.get(0).unwrap()  {
-                "dir"=> self.filesystem.add_directory(self.pwd, elements.get(1).unwrap()),
-                x => self.filesystem.add_file(self.pwd, elements.get(1).unwrap(), x.to_string().parse().unwrap())
+            match *elements.get(0).unwrap() {
+                "dir" => self
+                    .filesystem
+                    .add_directory(self.pwd, elements.get(1).unwrap()),
+                x => self.filesystem.add_file(
+                    self.pwd,
+                    elements.get(1).unwrap(),
+                    x.to_string().parse().unwrap(),
+                ),
             };
         }
     }
@@ -178,7 +180,6 @@ impl Terminal {
             self.pwd = self.filesystem.find_dir_id(args.get(0).unwrap(), self.pwd);
         }
     }
-
 }
 
 fn main() {
@@ -197,17 +198,17 @@ fn main() {
     }
 
     let mut small_sizes = 0;
-    const CUTOFF_SIZE:i32 = 100000;
+    const CUTOFF_SIZE: i32 = 100000;
     let dir_sizes = terminal.filesystem.get_directory_sizes();
     for size in &dir_sizes {
-        if *size <= CUTOFF_SIZE{
+        if *size <= CUTOFF_SIZE {
             small_sizes += *size;
         }
     }
     println!("Cutoff Sizes: {small_sizes}");
 
-    const TOTAL_DISK_SPACE:i32 = 70000000;
-    const DISK_SPACE_NEEDED:i32 = 30000000;
+    const TOTAL_DISK_SPACE: i32 = 70000000;
+    const DISK_SPACE_NEEDED: i32 = 30000000;
     let mut max_size = 0;
     for size in &dir_sizes {
         if *size > max_size {
@@ -215,7 +216,6 @@ fn main() {
         }
     }
     let free_up_required = DISK_SPACE_NEEDED - TOTAL_DISK_SPACE + max_size;
-    
     let mut smallest_free_up = max_size;
     for size in &dir_sizes {
         if *size > free_up_required && *size < smallest_free_up {
